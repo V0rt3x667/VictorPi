@@ -6,5 +6,4 @@
 |___/_/\___/\__/\____/_/  /_/   /_/\___/
 ````````````````````````````````````````
 
-A set of scripts to emulate a RaspberryPi using Arch Linux ARM, Docker and Qemu. The script can also generate sdcard images that can be deployed on real hardware and used as virtual storage for QEMU.
-
+A set of scripts to emulate a Raspberry Pi using Arch Linux ARM, Alpine Linux, Docker and QEMU. The script can also generate .img files that can be deployed on real hardware and/or used as virtual storage in QEMU.
