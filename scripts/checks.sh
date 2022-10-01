@@ -9,7 +9,7 @@ ARCH=
 # Must be root for some ops
 checkRoot() {
     if [[ $(sudo whoami) != "root" ]]; then
-        echo -e "[$FAIL] VictorPie will not continue"
+        echo -e "[$FAIL] VictorPi will not continue"
         echo -e "[$FAIL] Please type your user password or run this script as root"
         exit 1
     fi

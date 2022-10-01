@@ -56,41 +56,63 @@ download() {
     curl -sL -O -C - "$1"
 }
 
-## install_from_git
-install_from_git() {
+function install_from_git() {
     cd /home
     download https://github.com/V0rt3x667/victorpi/archive/refs/heads/master.zip
     unzip master.zip
     cd victorpi-master
-    install -Dm755 victorpi /usr/bin/victorpi
-    install -dm755 /opt/victorpi/
-    cp -r victorpi/* /opt/victorpi/
+    install -Dm755 victorpi -t /usr/bin/
+    install -Dm755 victorpi/* -t /opt/victorpi/
     sed -i "s|OPT=.|OPT=\/opt|g" /usr/bin/victorpi
     cd ..
     rm -rf victorpi-master victorpi-master.zip
 }
 
-# install_ovmf() {
-#     fedora_ver=36
-#     pkgver=20220221gitb24306f15daa
-#     pkgrel=2
+function install_ovmf() {
+    local arch
+    local fedurl="https://kojipkgs.fedoraproject.org//packages/edk2"
+    local fedver=38
+    local pkgrel=1
+    local pkgver=20220826gitba0e0e4c6a17
 
-#     cd /home
+    : "${OVMFFOLDER:=$victorpi/$MODEL/ovmf}"
 
-#     # OVMF ARM
-#     download https://download-ib01.fedoraproject.org/pub/fedora/linux/releases/"${fedora_ver}"/Everything/x86_64/os/Packages/e/edk2-arm-"${pkgver}"-"${pkgrel}".fc"${fedora_ver}".noarch.rpm
-#     rpm2cpio edk2-arm-"${pkgver}"-"${pkgrel}".fc"${fedora_ver}".noarch.rpm | cpio -idmv
+    if [[ -d "${OVMFFOLDER}" ]]; then
+        return
+    else
+        mkdir -p "${OVMFFOLDER}"
+    fi
 
-#     # OVMF AARCH64
-#     download https://download-ib01.fedoraproject.org/pub/fedora/linux/releases/"${fedora_ver}"/Everything/x86_64/os/Packages/e/edk2-aarch64-"${pkgver}"-"${pkgrel}".fc"${fedora_ver}".noarch.rpm
-#     rpm2cpio edk2-aarch64-"${pkgver}"-"${pkgrel}".fc"${fedora_ver}".noarch.rpm | cpio -idmv
+    if [[ "$MODEL" = "rpi-2" ]]; then
+        cd "${OVMFFOLDER}"
+        arch=arm
+        download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
+        rpm2cpio ./*.noarch.rpm | cpio -idmv
+        checkDocker
+        if [[ "$DOCKER" = "1" ]]; then
+            cp -av usr /
+            cd /usr/share/AAVMF
+            ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
+        else
+            cd /usr/share/AAVMF
+            ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
+        fi
+    elif [[ "$MODEL" = "rpi-3" ]]; then
+        download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
+        rpm2cpio ./*.noarch.rpm | cpio -idmv
+        checkDocker
+        if [[ "$DOCKER" = "1" ]]; then
+            cp -av usr /
+            cd /usr/share/AAVMF
+            ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
+        else
+            cd /usr/share/AAVMF
+            ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
+        fi
+    fi
+}
 
-#     cp -av usr /
-#     cd /usr/share/AAVMF
-#     ln -sf ../edk2/arm/vars-template-pflash.raw AAVMF32_VARS.fd
-# }
-
-echo "===> Installing Simon Pi"
+echo "===> Installing VictorPi"
 install_from_git
 
 echo "===> Installing AVMF ARM & AARCH64"

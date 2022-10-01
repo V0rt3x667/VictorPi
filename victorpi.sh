@@ -29,13 +29,13 @@ PROGS=("$BSDTAR" "$DNSMASQ" "$EXT4" "$FDISK" "$FILE" "$GREP" "$IPTABLES" \
 "$PS" "$QEMUARM" "$QEMUARM64" "$QEMUIMG" "$SUDO" "$VFAT" "$CURL")
 
 # Parameters, Folders and Files
-: "${VICTORPIE:=$HOME/.victorpi}"
+: "${VICTORPI:=$HOME/.victorpi}"
 USER=$(whoami)
 SNDARG=$2
 MODEL=$1
 FAMILIES=4
 : "${FILENAME:=sd-arch-$MODEL-qemu.img}"
-ARCHIMGPATH=$VICTORPIE/$FILENAME
+ARCHIMGPATH=$VICTORPI/$FILENAME
 
 # Import External Scripts
 . $OPT/victorpi/scripts/checks.sh
@@ -75,12 +75,14 @@ checkDeps() {
 
 version() {
 echo -e "\e[38;5;$((RANDOM%257))m" && cat << '_EOF_'
- _    ___      __             ____  _    
-| |  / (_)____/ /_____  _____/ __ \(_)__ 
-| | / / / ___/ __/ __ \/ ___/ /_/ / / _ \
-| |/ / / /__/ /_/ /_/ / /  / ____/ /  __/
-|___/_/\___/\__/\____/_/  /_/   /_/\___/ 
-                                         
+ ▄▄   ▄▄ ▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄   ▄▄▄▄▄▄▄ ▄▄▄ 
+█  █ █  █   █       █       █       █   ▄  █ █       █   █
+█  █▄█  █   █       █▄     ▄█   ▄   █  █ █ █ █    ▄  █   █
+█       █   █     ▄▄█ █   █ █  █ █  █   █▄▄█▄█   █▄█ █   █
+█       █   █    █    █   █ █  █▄█  █    ▄▄  █    ▄▄▄█   █
+ █     ██   █    █▄▄  █   █ █       █   █  █ █   █   █   █
+  █▄▄▄█ █▄▄▄█▄▄▄▄▄▄▄█ █▄▄▄█ █▄▄▄▄▄▄▄█▄▄▄█  █▄█▄▄▄█   █▄▄▄█
+
 _EOF_
 
 echo v$VERSION
@@ -92,7 +94,7 @@ exit 0
 help () {
     echo "Emulate a Raspberry Pi SBC on an x86-64 Machine."
     echo ""
-    echo -e "Default Storage Location: $G$VICTORPIE$RST"
+    echo -e "Default Storage Location: $G$VICTORPI$RST"
     echo ""
     echo "Usage: ./victorpi MODEL [<opts>]"
     echo "Available MODELs: rpi-2 rpi-3 rpi-4"
