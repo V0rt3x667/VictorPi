@@ -41,13 +41,14 @@ OVMFPATH="$VICTORPI/$MODEL/AAVMF"
 
 # Import External Scripts
 . $OPT/scripts/checks.sh
-. $OPT/scripts/docker.sh
-. $OPT/scripts/storage.sh
 . $OPT/scripts/custom.sh
+. $OPT/scripts/docker.sh
+. $OPT/scripts/helpers.sh
 . $OPT/scripts/images.sh
 . $OPT/scripts/network.sh
 . $OPT/scripts/qemu.sh
 . $OPT/scripts/runemu.sh
+. $OPT/scripts/storage.sh
 
 # Text Colors
 FAIL='\e[0;31mFAILED\e[0m'
@@ -89,8 +90,6 @@ function addKernel() {
     kver="$(download $kurl/latest | grep -m 1 tag_name | cut -d\" -f4)"
 
     download "$kurl/download/$kver/qemu_kernel_$MODEL-$kver"
-
-    rm -rf /tmp/*
 }
 
 function addAAVFM() {
