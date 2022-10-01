@@ -8,17 +8,17 @@ FIRSTIP="${GATEWAY%.1}.2"
 LASTIP="${GATEWAY%.1}.254"
 BROADCAST="${GATEWAY%.1}.255"
 
-genMAC() {
+function genMAC() {
     # Generate Random MAC ADDRESS to avoid collisions
     printf "52:54:%02x:%02x:%02x:%02x" $(( RANDOM & 0xff)) $(( RANDOM & 0xff )) $(( RANDOM & 0xff)) $(( RANDOM & 0xff ))
 }
 
-getInternetIf() {
+function getInternetIf() {
     iface=$(ip route | grep default | sed -e "s/^.*dev.//" -e "s/.proto.*//")
     echo "$iface"
 }
 
-checkTap() {
+function checkTap() {
     if [ -d "/sys/class/net/$TAP" ]; then
         while [ -d "/sys/class/net/$TAP" ]; do
             TAPON=1
@@ -29,35 +29,35 @@ checkTap() {
     fi
 }
 
-checkDnsmasq() {
+function checkDnsmasq() {
     DNSMASQPID=$(pgrep -f $GATEWAY)
 }
 
-setupDnsmasq() {
+function setupDnsmasq() {
     local nameservers
     local searchdomains
-    
+
     DNSMASQ_OPTS="--listen-address=$GATEWAY --interface=$BRIDGE \
     --bind-interfaces --dhcp-range=$FIRSTIP,$LASTIP"
-    
+
     # Build DNS options from container /etc/resolv.conf
     mapfile -t nameservers < <(grep nameserver /etc/resolv.conf \
     | head -n 2 | sed 's/nameserver //')
     mapfile -t searchdomains < <(grep search /etc/resolv.conf \
     | sed 's/search //' | sed 's/ /,/g')
-    
+
     domainname=$(echo "${searchdomains[@]}" | awk -F"," '{print $1}')
-    
+
     if [[ -n $domainname  ]]; then
         DNSMASQ_OPTS+=" --dhcp-option=option:domain-name,$domainname"
     fi
-    
+
     for nameserver in "${nameservers[@]}"; do
         [[ -z $DNS_SERVERS ]] \
         && DNS_SERVERS=$nameserver \
         || DNS_SERVERS="$DNS_SERVERS,$nameserver"
     done
-    
+
     if [ -z "$DNSMASQPID" ] \
     && ! ss -ntl | grep -q :53; then
         echo -e "[$PASS] Turning up dnsmasq for guest IP assignment ..."
@@ -73,17 +73,17 @@ setupDnsmasq() {
     fi
 }
 
-killDnsmasq() {
+function killDnsmasq() {
     if [ -n "$DNSMASQPID" ]; then
         sudo -E kill -9 "$DNSMASQPID"
     fi
 }
 
-killNetwork() {
+function killNetwork() {
     echo -e "[$PASS] Shutting down present network for QEMU ..."
     checkDnsmasq
     killDnsmasq
-    
+
     while [ -d "/sys/class/net/$BRIDGE" ] \
     || [ -d "/sys/class/net/$TAP" ]; do
         sudo -E "$IP" link set "$TAP" nomaster > /dev/null 2>&1 # Enslave tap
@@ -93,11 +93,11 @@ killNetwork() {
     done
 }
 
-fkillNetwork() {
+function fkillNetwork() {
     echo -e "[$PASS] Forced network shutdown for QEMU ..."
     checkDnsmasq
     killDnsmasq
-    
+
     while [ -d "/sys/class/net/$BRIDGE" ] \
     || [ -n "$(find /sys/class/net/ -name "rasp*")" ]; do
         for i in /sys/class/net/rasp-tap*; do
@@ -111,17 +111,17 @@ fkillNetwork() {
     done
 }
 
-bridgeUp() {
+function bridgeUp() {
     # Add bridge
     sudo -E "$IP" link add "$BRIDGE" type bridge
     # Set ip to bridge interface
     sudo -E "$IP" addr add "$GATEWAY"/24 broadcast "$BROADCAST" dev "$BRIDGE"
     sudo -E "$IP" link set "$BRIDGE" up
-    
+
     sleep 0.5s
 }
 
-setNat() {
+function setNat() {
     iface=$(getInternetIf)
     sudo -E "$IPTABLES" -t nat -A POSTROUTING -o "$iface" -j MASQUERADE
     sudo -E "$IPTABLES" -A FORWARD -m conntrack \
@@ -129,26 +129,26 @@ setNat() {
     sudo -E "$IPTABLES" -A FORWARD -i "$TAP" -o "$iface" -j ACCEPT
 }
 
-setTap() {
+function setTap() {
     # Add tap interface
     sudo -E "$IP" tuntap add dev "$TAP" mode tap user "$(checkUser)"
     sudo -E "$IP" link set "$TAP" up promisc on
-    
+
     sleep 0.5s
     # Bind tap to bridge
     sudo -E "$IP" link set $TAP master "$BRIDGE"
 }
 
-createNetwork() {
+function createNetwork() {
     echo -e "[$PASS] Turning up a network for QEMU ..."
     if [ "$IPFORWARD" != "1" ]; then
         sudo -E su -c "echo 1 > /proc/sys/net/ipv4/ip_forward"
     fi
-    
+
     if [ $TAPON -eq 0 ]; then
         bridgeUp
     fi
-    
+
     setTap
     checkDnsmasq
     setupDnsmasq

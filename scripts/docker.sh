@@ -2,7 +2,7 @@
 
 DOCKER=
 
-checkDocker() {
+function checkDocker() {
     if [ -f /.dockerenv ]; then
         DOCKER=1
         echo -e "[$WARN] In a Docker container ..."
