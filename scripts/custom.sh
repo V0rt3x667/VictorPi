@@ -3,7 +3,7 @@
 : "${CUSTOMDATAFOLDER:=$victorpi/$MODEL/data}"
 : "${EXTPKGSFOLDER:=$victorpi/$MODEL/pkgs}"
 
-customContent() {
+function customContent() {
     if [ -d "$CUSTOMDATAFOLDER" ]; then
         echo -e "[$WARN] $CUSTOMDATAFOLDER folder is present"
         if [ "$(ls "$CUSTOMDATAFOLDER")" ]; then

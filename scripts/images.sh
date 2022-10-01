@@ -5,9 +5,9 @@ checkArch
 ARCHISO="ArchLinuxARM-rpi-$ARCH-latest.tar.gz"
 FILES=("$ARCHISO" "$ARCHISO.md5")
 
-integrityCheck() {
+function integrityCheck() {
     cd "$VICTORPI/$MODEL" || exit
-    
+
     if md5sum --status -c "$ARCHISO.md5"; then
         echo -e "[$PASS] Integrity check successfully completed"
     else
@@ -17,7 +17,7 @@ integrityCheck() {
     fi
 }
 
-downloadArchImage() {
+function downloadArchImage() {
     for i in "${FILES[@]}"; do
         if [ -f "$VICTORPI/$MODEL/$i" ]; then
             echo -e "[$WARN] $i is present";
@@ -26,14 +26,14 @@ downloadArchImage() {
             "$CURL" -# -L -C - "http://os.archlinuxarm.org/os/$i" -o "$VICTORPI/$MODEL/$i"
         fi
     done
-    
+
     integrityCheck
 }
 
-createArchImg() {
+function createArchImg() {
     GIGA="$1"
     isaNumber='^[0-9]+$'
-    
+
     if ! [[ "$GIGA" =~ $isaNumber ]] || [ -z "$GIGA" ]; then
         echo -e "[$FAIL] Please specify a size in GB"
         exit 1
@@ -41,11 +41,11 @@ createArchImg() {
         echo -e "[$FAIL] Please specify a size >= 2 GB"
         exit 1
     fi
-    
+
     checkDeps
     isMounted
     downloadArchImage
-    
+ 
     if [ -e "$ARCHIMGPATH" ]; then
         echo -e "[$WARN] An ${ARCHIMGPATH##*/} file already exists. Please delete it"
         exit 1
@@ -57,7 +57,7 @@ createArchImg() {
         echo n; echo p; echo 2; echo 8192; echo ; echo ; echo w) | \
         $FDISK "$ARCHIMGPATH" >/dev/null 2>&1
     fi
-    
+
     sync
     mapImg
     checkRoot
@@ -76,9 +76,9 @@ createArchImg() {
     echo -e "[$PASS] DONE"
 }
 
-runCustomImg() {
+function runCustomImg() {
     CUSTOMIMG="$1"
-    
+
     if [ -z "$CUSTOMIMG" ]; then
         echo -e "[$FAIL] Please specify an image path"
         exit 1
@@ -92,4 +92,3 @@ runCustomImg() {
         echo -e "[$PASS] Running with disk image named ${CUSTOMIMG##*/}"
     fi
 }
-

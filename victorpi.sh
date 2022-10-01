@@ -35,17 +35,19 @@ SNDARG=$2
 MODEL=$1
 FAMILIES=4
 : "${FILENAME:=sd-arch-$MODEL-qemu.img}"
-ARCHIMGPATH=$VICTORPI/$FILENAME
+ARCHIMGPATH="$VICTORPI/$MODEL/$FILENAME"
+KERNELPATH="$VICTORPI/$MODEL/kernel"
+OVMFPATH="$VICTORPI/$MODEL/AAVMF"
 
 # Import External Scripts
-. $OPT/victorpi/scripts/checks.sh
-. $OPT/victorpi/scripts/docker.sh
-. $OPT/victorpi/scripts/storage.sh
-. $OPT/victorpi/scripts/custom.sh
-. $OPT/victorpi/scripts/images.sh
-. $OPT/victorpi/scripts/network.sh
-. $OPT/victorpi/scripts/qemu.sh
-. $OPT/victorpi/scripts/runemu.sh
+. $OPT/scripts/checks.sh
+. $OPT/scripts/docker.sh
+. $OPT/scripts/storage.sh
+. $OPT/scripts/custom.sh
+. $OPT/scripts/images.sh
+. $OPT/scripts/network.sh
+. $OPT/scripts/qemu.sh
+. $OPT/scripts/runemu.sh
 
 # Text Colors
 FAIL='\e[0;31mFAILED\e[0m'
@@ -62,7 +64,7 @@ checkModel() {
     fi
 }
 
-checkDeps() {
+function checkDeps() {
     for i in "${PROGS[@]}"; do
         if command -v "$i" > /dev/null; then
             echo -e "[$PASS] $i executable found"
@@ -73,7 +75,51 @@ checkDeps() {
     done
 }
 
-version() {
+function addKernel() {
+    local kver
+    local kurl="https://api.github.com/repos/M0Rf30/qemu-kernel-$MODEL/releases"
+
+    if [[ -d "$KERNELPATH" ]]; then
+        return
+    else
+        mkdir -p "$KERNELPATH"
+    fi
+
+    cd "$KERNELPATH" || exit
+    kver="$(download $kurl/latest | grep -m 1 tag_name | cut -d\" -f4)"
+
+    download "$kurl/download/$kver/qemu_kernel_$MODEL-$kver"
+
+    rm -rf /tmp/*
+}
+
+function addAAVFM() {
+    local arch
+    local fedurl="https://kojipkgs.fedoraproject.org//packages/edk2"
+    local fedver=38
+    local pkgrel=1
+    local pkgver=20220826gitba0e0e4c6a17
+
+    if [[ -d "$OVMFPATH" ]]; then
+        return
+    else
+        mkdir -p "$OVMFPATH"
+    fi
+
+    if [[ "$MODEL" = "rpi-2" ]]; then
+        arch=arm
+    else
+        arch=aarch64
+    fi
+
+    cd "$OVMFPATH" || exit
+    download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
+    bsdtar xvf --strip-components=2 ./*.noarch.rpm
+    ln -sf ./edk2/$arch/vars-template-pflash.raw ./AAVMF/AAVMF32_VARS.fd
+    rm ./*.noarch.rpm
+}
+
+function version() {
 echo -e "\e[38;5;$((RANDOM%257))m" && cat << '_EOF_'
  ▄▄   ▄▄ ▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄   ▄▄▄▄▄▄▄ ▄▄▄ 
 █  █ █  █   █       █       █       █   ▄  █ █       █   █
@@ -86,12 +132,13 @@ echo -e "\e[38;5;$((RANDOM%257))m" && cat << '_EOF_'
 _EOF_
 
 echo v$VERSION
-echo "Created by V0rt3x667"
+echo "This project is derived from simonpi https://github.com/M0Rf30/simonpi by M0Rf30."
+echo "Re-animated and re-stiched as VictorPi by me V0rt3x667 for my own nefarious ends"
 
 exit 0
 }
 
-help () {
+function help () {
     echo "Emulate a Raspberry Pi SBC on an x86-64 Machine."
     echo ""
     echo -e "Default Storage Location: $G$VICTORPI$RST"
@@ -115,7 +162,7 @@ help () {
     exit 0
 }
 
-process_args () {
+function process_args () {
     # Process other arguments.
     case "$1" in
         rpi*   ) checkModel ;;
@@ -138,5 +185,12 @@ process_args () {
         *     ) help ;;
     esac
 }
+
+if [[ "$DOCKER" = "0" ]]; then
+    return
+else
+    addAAVFM
+    addKernel
+fi
 
 process_args "$@";

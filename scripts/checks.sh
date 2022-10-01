@@ -7,7 +7,7 @@ ARCH=
 : "${EXTERPORT1:=8080}"
 
 # Must be root for some ops
-checkRoot() {
+function checkRoot() {
     if [[ $(sudo whoami) != "root" ]]; then
         echo -e "[$FAIL] VictorPi will not continue"
         echo -e "[$FAIL] Please type your user password or run this script as root"
@@ -15,11 +15,11 @@ checkRoot() {
     fi
 }
 
-checkUser() {
+function checkUser() {
     whoami
 }
 
-checkArch() {
+function checkArch() {
     case $MODEL in
         rpi-2) ARCH="armv7" ;;
         rpi-3) ARCH="aarch64" ;;
@@ -27,40 +27,37 @@ checkArch() {
     esac
 }
 
-finalizeIt() {
+function finalizeIt() {
     umountParts
     umountImg
     checkQemu
-    if [ "$DOCKER" = "0" ] && [ "$QEMUISRUNNING" = "0" ]; then
+
+    if [[ "$DOCKER" = "0" ]] && [[ "$QEMUISRUNNING" = "0" ]]; then
         killNetwork
     fi
 }
 
-initChecks() {
+function initChecks() {
     checkDocker
-    
+
     if [ "$SNDARG" != "-i" ]; then
         CMD=" -initrd $BOOTPATH/initramfs-linux.img"
     fi
-    
+
     if [ "$DOCKER" = "0" ]; then
         checkRoot
         checkTap
         createNetwork
-        
         if [ "$MODEL" = "rpi" ]; then
             NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
         else
             NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
         fi
-        
     else
-        
         if [ "$MODEL" = "rpi" ]; then
             NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
         else
             NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
         fi
-        
     fi
 }

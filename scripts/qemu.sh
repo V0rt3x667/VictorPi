@@ -5,18 +5,17 @@ QEMUISRUNNING=
 # QEMU Vars
 export QEMU_AUDIO_DRV=none
 
-checkQemu() {
-    if [ -n "$(pidof "$QEMUARM")" ] \
-    || [ -n "$(pidof "$QEMUARM64")" ]; then
+function checkQemu() {
+    if [[ -n "$(pidof "$QEMUARM")" ]] || [[ -n "$(pidof "$QEMUARM64")" ]]; then
         QEMUISRUNNING=1
     else
         QEMUISRUNNING=0
     fi
 }
 
-killQemu() {
+function killQemu() {
     checkRoot
-    
+
     if [ $QEMUISRUNNING = "1" ]; then
         echo -e "[$PASS] Killing QEMU instances ..."
         if [ -n "$(pidof "$QEMUARM")" ]; then
