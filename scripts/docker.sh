@@ -1,0 +1,13 @@
+#!/bin/bash
+
+DOCKER=
+
+checkDocker() {
+    if [ -f /.dockerenv ]; then
+        DOCKER=1
+        echo -e "[$WARN] In a Docker container ..."
+    else
+        DOCKER=0
+        echo -e "[$WARN] Out of a Docker container ..."
+    fi
+}
