@@ -37,7 +37,7 @@ FAMILIES=4
 : "${FILENAME:=sd-arch-$MODEL-qemu.img}"
 ARCHIMGPATH="$VICTORPI/$MODEL/$FILENAME"
 KERNELPATH="$VICTORPI/$MODEL/kernel"
-OVMFPATH="$VICTORPI/$MODEL/AAVMF"
+OVMFPATH="$VICTORPI/$MODEL/ovmf"
 
 # Import External Scripts
 . $OPT/scripts/checks.sh
@@ -87,9 +87,9 @@ function addKernel() {
     fi
 
     cd "$KERNELPATH" || exit
-    kver="$(download $kurl/latest | grep -m 1 tag_name | cut -d\" -f4)"
+    kver="$(download "$kurl"/latest | grep -m 1 tag_name | cut -d\" -f4)"
 
-    download "$kurl/download/$kver/qemu_kernel_$MODEL-$kver"
+    download \""$kurl/download/$kver/qemu_kernel_$MODEL-$kver\""
 }
 
 function addAAVFM() {
@@ -113,7 +113,7 @@ function addAAVFM() {
 
     cd "$OVMFPATH" || exit
     download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
-    bsdtar xvf --strip-components=2 ./*.noarch.rpm
+    bsdtar xvf ./*.noarch.rpm --strip-components=3
     ln -sf ./edk2/$arch/vars-template-pflash.raw ./AAVMF/AAVMF32_VARS.fd
     rm ./*.noarch.rpm
 }

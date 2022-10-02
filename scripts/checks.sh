@@ -48,16 +48,8 @@ function initChecks() {
         checkRoot
         checkTap
         createNetwork
-        if [ "$MODEL" = "rpi" ]; then
-            NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net tap,ifname=$TAP,script=no,downscript=no"
-        else
-            NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
-        fi
+        NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
     else
-        if [ "$MODEL" = "rpi" ]; then
-            NETWORKCMD="$CMD -net nic,macaddr=$(genMAC) -net user,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
-        else
-            NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
-        fi
+        NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
     fi
 }

@@ -1,7 +1,7 @@
 #!/bin/bash
 
-: "${CUSTOMDATAFOLDER:=$victorpi/$MODEL/data}"
-: "${EXTPKGSFOLDER:=$victorpi/$MODEL/pkgs}"
+: "${CUSTOMDATAFOLDER:=$VICTORPI/$MODEL/data}"
+: "${EXTPKGSFOLDER:=$VICTORPI/$MODEL/pkgs}"
 
 function customContent() {
     if [ -d "$CUSTOMDATAFOLDER" ]; then
