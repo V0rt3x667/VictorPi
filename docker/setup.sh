@@ -34,7 +34,7 @@ function addNetworking() {
 
     # Add BRIDGE_IF to /etc/qemu/bridge.conf
     mkdir -p /etc/qemu
-    echo "allow raspi-br0" >>/etc/qemu/bridge.conf
+    echo "allow rasp-br0" >>/etc/qemu/bridge.conf
 
     # Make sure we have the TUN device node
     if [ ! -e /dev/net/tun ]; then
