@@ -76,48 +76,6 @@ function checkDeps() {
     done
 }
 
-function addKernel() {
-    local kver
-    local kurl="https://api.github.com/repos/M0Rf30/qemu-kernel-$MODEL/releases"
-
-    if [[ -d "$KERNELPATH" ]]; then
-        return
-    else
-        mkdir -p "$KERNELPATH"
-    fi
-
-    cd "$KERNELPATH" || exit
-    kver="$(download "$kurl"/latest | grep -m 1 tag_name | cut -d\" -f4)"
-
-    download \""$kurl/download/$kver/qemu_kernel_$MODEL-$kver\""
-}
-
-function addAAVFM() {
-    local arch
-    local fedurl="https://kojipkgs.fedoraproject.org//packages/edk2"
-    local fedver=38
-    local pkgrel=1
-    local pkgver=20220826gitba0e0e4c6a17
-
-    if [[ -d "$OVMFPATH" ]]; then
-        return
-    else
-        mkdir -p "$OVMFPATH"
-    fi
-
-    if [[ "$MODEL" = "rpi-2" ]]; then
-        arch=arm
-    else
-        arch=aarch64
-    fi
-
-    cd "$OVMFPATH" || exit
-    download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
-    bsdtar xvf ./*.noarch.rpm --strip-components=3
-    ln -sf ./edk2/$arch/vars-template-pflash.raw ./AAVMF/AAVMF32_VARS.fd
-    rm ./*.noarch.rpm
-}
-
 function version() {
 echo -e "\e[38;5;$((RANDOM%257))m" && cat << '_EOF_'
  ▄▄   ▄▄ ▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄▄ ▄▄▄▄▄▄   ▄▄▄▄▄▄▄ ▄▄▄ 
@@ -184,12 +142,5 @@ function process_args () {
         *     ) help ;;
     esac
 }
-
-if [[ "$DOCKER" = "0" ]]; then
-    return
-else
-    addAAVFM
-    addKernel
-fi
 
 process_args "$@";

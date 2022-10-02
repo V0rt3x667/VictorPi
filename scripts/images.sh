@@ -17,6 +17,48 @@ function integrityCheck() {
     fi
 }
 
+function downloadKernel() {
+    local kver
+    local apiurl="https://api.github.com/repos/M0Rf30/qemu-kernel-$MODEL/releases/latest"
+    local giturl="https://github.com/M0Rf30/qemu-kernel-$MODEL/releases/download"
+
+    if [[ -d "$KERNELPATH" ]]; then
+        return
+    else
+        mkdir -p "$KERNELPATH"
+    fi
+
+    cd "$KERNELPATH" || exit
+    kver=$(curl --silent --no-buffer $apiurl | grep -m 1 tag_name | cut -d\" -f4)
+    download "$giturl/$kver/qemu_kernel_${MODEL/-/_}-$kver"
+}
+
+function downloadOVFM() {
+    local arch
+    local fedurl="https://kojipkgs.fedoraproject.org//packages/edk2"
+    local fedver=38
+    local pkgrel=1
+    local pkgver=20220826gitba0e0e4c6a17
+
+    if [[ -d "$OVMFPATH" ]]; then
+        return
+    else
+        mkdir -p "$OVMFPATH"
+    fi
+
+    if [[ "$MODEL" = "rpi-2" ]]; then
+        arch=arm
+    else
+        arch=aarch64
+    fi
+
+    cd "$OVMFPATH" || exit
+    download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
+    bsdtar xf ./*.noarch.rpm --strip-components=3
+    ln -sf ./edk2/$arch/vars-template-pflash.raw ./AAVMF/AAVMF32_VARS.fd
+    rm ./*.noarch.rpm
+}
+
 function downloadArchImage() {
     for i in "${FILES[@]}"; do
         if [ -f "$VICTORPI/$MODEL/$i" ]; then
@@ -43,9 +85,11 @@ function createArchImg() {
     fi
 
     checkDeps
+    downloadKernel
+    downloadOVFM
     isMounted
     downloadArchImage
- 
+
     if [ -e "$ARCHIMGPATH" ]; then
         echo -e "[$WARN] An ${ARCHIMGPATH##*/} file already exists. Please delete it"
         exit 1

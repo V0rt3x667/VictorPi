@@ -8,11 +8,11 @@ function run_rpi2() {
         -m 1024 \
         -device virtio-blk-device,drive=hd0 \
         -device virtio-blk-device,drive=hd1 \
-        -drive file=$OVMFPATH/edk2/QEMU_EFI-pflash.raw,if=pflash,format=raw,readonly=on \
-        -drive file=$OVMFPATH/edk2/vars-template-pflash.raw,if=pflash,format=raw \
+        -drive file=$OVMFPATH/edk2/${ARCH/v7/}/QEMU_EFI-pflash.raw,if=pflash,format=raw,readonly=on \
+        -drive file=$OVMFPATH/edk2/${ARCH/v7/}/vars-template-pflash.raw,if=pflash,format=raw \
         -drive file=fat:rw:$KERNELPATH,if=none,format=raw,cache=none,id=hd0 \
-        -drive file=$ARCHIMGPATH/sd-arch-$MODEL-qemu.img,if=none,format=raw,cache=none,id=hd1 \
-        -kernel $KERNELPATH/qemu_kernel_rpi_2-5.19.11 \
+        -drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
+        -kernel $KERNELPATH/qemu_kernel_${MODEL/-/_}-5.19.11 \
         -append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0 loglevel=0 panic=1 quiet\""
 
     QEMURPI2+="$NETWORKCMD"
@@ -27,11 +27,11 @@ function run_rpi3() {
         -m 2048 \
         -device virtio-blk-device,drive=hd0 \
         -device virtio-blk-device,drive=hd1 \
-        -drive file=$OVMFPATH/edk2/QEMU_EFI-pflash.raw,if=pflash,format=raw,readonly=on \
-        -drive file=$OVMFPATH/edk2/vars-template-pflash.raw,if=pflash,format=raw \
+        -drive file=$OVMFPATH/edk2/$ARCH/QEMU_EFI-pflash.raw,if=pflash,format=raw,readonly=on \
+        -drive file=$OVMFPATH/edk2/$ARCH/vars-template-pflash.raw,if=pflash,format=raw \
         -drive file=fat:rw:$KERNELPATH,if=none,format=raw,cache=none,id=hd0 \
-        -drive file=$ARCHIMGPATH/sd-arch-$MODEL-qemu.img,if=none,format=raw,cache=none,id=hd1 \
-        -kernel $KERNELPATH/qemu_kernel_rpi_2-5.19.11 \
+        -drive file=$ARCHIMGPATH,if=none,format=raw,cache=none,id=hd1 \
+        -kernel $KERNELPATH/qemu_kernel_${MODEL/-/_}-5.19.11 \
         -append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0 loglevel=0 panic=1 quiet\""
 
     QEMURPI3+=$NETWORKCMD
