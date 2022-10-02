@@ -34,7 +34,7 @@ function run_rpi3() {
         -kernel $KERNELPATH/qemu_kernel_${MODEL/-/_}-5.19.11 \
         -append \"root=/dev/vda2 fstab=no rootfstype=ext4 rw audit=0 console=ttyAMA0 loglevel=0 panic=1 quiet\""
 
-    QEMURPI3+=$NETWORKCMD
+    QEMURPI3+="$NETWORKCMD"
     eval "$QEMURPI3"
 }
 
