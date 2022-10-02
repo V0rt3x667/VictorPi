@@ -33,7 +33,7 @@ function addKernels() {
     local kurl="https://api.github.com/repos/M0Rf30/qemu-kernel-$MODEL/releases"
 
     mkdir /tmp && cd /tmp
-    kver="$(download $kurl/latest | grep -m 1 tag_name | cut -d\" -f4)"
+    kver="$(download "$kurl"/latest | grep -m 1 tag_name | cut -d\" -f4)"
 
     download "$kurl/download/$kver/qemu_kernel_$MODEL-$kver"
     install -Dm644 "/tmp/qemu_kernel_rpi_$MODEL-$kver" -t "/opt/victorpi/kernel/qemu-kernel-$MODEL"
