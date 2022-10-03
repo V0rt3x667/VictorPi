@@ -190,10 +190,8 @@ function mapImg() {
 
 function mountImg() {
     echo -e "[$PASS] Mounting disk image: ${ARCHIMGPATH##*/} ..."
-    sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGTH1*512 )) \
-    "$DEVICE1" "$ARCHIMGPATH" > /dev/null 2>&1
-    sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGTH2*512 )) \
-    "$DEVICE2" "$ARCHIMGPATH" > /dev/null 2>&1
+    sudo -E losetup -o $(( START1*512 )) --sizelimit $(( LENGTH1*512 )) "$DEVICE1" "$ARCHIMGPATH" > /dev/null 2>&1
+    sudo -E losetup -o $(( START2*512 )) --sizelimit $(( LENGTH2*512 )) "$DEVICE2" "$ARCHIMGPATH" > /dev/null 2>&1
 }
 
 function umountImg() {
