@@ -76,8 +76,6 @@ echo -e "\e[38;5;$((RANDOM%257))m" && cat << '_EOF_'
 _EOF_
 
 echo v$VERSION
-echo "This project is derived from simonpi https://github.com/M0Rf30/simonpi by M0Rf30."
-echo "Re-animated and re-stiched as VictorPi by me V0rt3x667 for my own nefarious ends"
 
 exit 0
 }
