@@ -25,7 +25,7 @@ git clone --depth 1 https://github.com/V0rt3x667/victorpi
 
 ### Building the Docker Image
 ```shell
-cd docker
+cd victorpi
 ./build.sh
 ```
 
