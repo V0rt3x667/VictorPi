@@ -3,7 +3,7 @@
 # Enable This For Debug Purpose Only
 #set -x
 VERSION=1.0.0
-OPT=.
+OPT=/opt/victorpi
 
 # You Can Overwrite Paths Using: VARNAME=value ./victorpi
 
@@ -40,15 +40,13 @@ KERNELPATH="$VICTORPI/$MODEL/kernel"
 OVMFPATH="$VICTORPI/$MODEL/ovmf"
 
 # Import External Scripts
-. $OPT/scripts/checks.sh
-. $OPT/scripts/custom.sh
-. $OPT/scripts/docker.sh
-. $OPT/scripts/helpers.sh
-. $OPT/scripts/images.sh
-. $OPT/scripts/network.sh
-. $OPT/scripts/qemu.sh
-. $OPT/scripts/runemu.sh
-. $OPT/scripts/storage.sh
+source $OPT/scripts/checks.sh
+source $OPT/scripts/custom.sh
+source $OPT/scripts/images.sh
+source $OPT/scripts/network.sh
+source $OPT/scripts/qemu.sh
+source $OPT/scripts/runemu.sh
+source $OPT/scripts/storage.sh
 
 # Text Colors
 FAIL='\e[0;31mFAILED\e[0m'
@@ -63,17 +61,6 @@ checkModel() {
         echo "Available: rpi-2 rpi-3 rpi-4"
         exit 1
     fi
-}
-
-function checkDeps() {
-    for i in "${PROGS[@]}"; do
-        if command -v "$i" > /dev/null; then
-            echo -e "[$PASS] $i executable found"
-        else
-            echo -e "[$FAIL] $i executable not found. Please install it on your distro"
-            exit 1;
-        fi
-    done
 }
 
 function version() {

@@ -38,18 +38,9 @@ function finalizeIt() {
 }
 
 function initChecks() {
-    checkDocker
+     if [ "$SNDARG" != "-i" ]; then
+         CMD=" -initrd $BOOTPATH/initramfs-linux.img"
+     fi
 
-    if [ "$SNDARG" != "-i" ]; then
-        CMD=" -initrd $BOOTPATH/initramfs-linux.img"
-    fi
-
-    if [ "$DOCKER" = "0" ]; then
-        checkRoot
-        checkTap
-        createNetwork
-        NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev tap,id=net0,ifname=$TAP,script=no,downscript=no"
-    else
-        NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
-    fi
+    NETWORKCMD="$CMD -device virtio-net-device,mac=$(genMAC),netdev=net0 -netdev user,id=net0,hostfwd=tcp::$EXTERPORT0-:$GUESTPORT0,hostfwd=tcp::$EXTERPORT1-:$GUESTPORT1"
 }

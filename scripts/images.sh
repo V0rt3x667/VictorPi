@@ -30,7 +30,7 @@ function downloadKernel() {
 
     cd "$KERNELPATH" || exit
     kver=$(curl --silent --no-buffer $apiurl | grep -m 1 tag_name | cut -d\" -f4)
-    download "$giturl/$kver/qemu_kernel_${MODEL/-/_}-$kver"
+    curl -sL -# -O -C - "$giturl/$kver/qemu_kernel_${MODEL/-/_}-$kver"
 }
 
 function downloadOVFM() {
@@ -53,7 +53,7 @@ function downloadOVFM() {
     fi
 
     cd "$OVMFPATH" || exit
-    download "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
+    curl -sL -# -O -C - "$fedurl/$pkgver/$pkgrel.fc$fedver/noarch/edk2-$arch-$pkgver-$pkgrel.fc$fedver.noarch.rpm"
     bsdtar xf ./*.noarch.rpm --strip-components=3
     ln -sf ./edk2/$arch/vars-template-pflash.raw ./AAVMF/AAVMF32_VARS.fd
     rm ./*.noarch.rpm
@@ -65,7 +65,7 @@ function downloadArchImage() {
             echo -e "[$WARN] $i is present";
         else
             echo -e "[$PASS] Downloading ..."
-            "$CURL" -# -L -C - "http://os.archlinuxarm.org/os/$i" -o "$VICTORPI/$MODEL/$i"
+            curl -# -L -C - "http://os.archlinuxarm.org/os/$i" -o "$VICTORPI/$MODEL/$i"
         fi
     done
 
@@ -84,7 +84,6 @@ function createArchImg() {
         exit 1
     fi
 
-    checkDeps
     downloadKernel
     downloadOVFM
     isMounted
